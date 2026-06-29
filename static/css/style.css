@@ -1,0 +1,63 @@
+body{
+    background:#f5f7fa;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+.hero{
+    padding:100px 20px;
+    text-align:center;
+    background:linear-gradient(135deg,#1e3c72,#2a5298);
+    color:white;
+}
+
+.hero h1{
+    font-size:55px;
+    font-weight:bold;
+}
+
+.hero p{
+    font-size:22px;
+    margin-top:20px;
+    margin-bottom:30px;
+}
+
+.feature-card{
+    padding:25px;
+    text-align:center;
+    border:none;
+    border-radius:15px;
+    transition:0.3s;
+    box-shadow:0 5px 20px rgba(0,0,0,.15);
+}
+
+.feature-card:hover{
+    transform:translateY(-10px);
+}
+
+footer{
+    color:gray;
+}
+.card{
+    border-radius:20px;
+}
+
+body{
+    background:#eef2f7;
+}
+
+input{
+    height:45px;
+}
+
+.btn{
+    height:45px;
+}
+.card{
+    transition:0.3s;
+}
+
+.card:hover{
+
+    transform:scale(1.05);
+
+}
