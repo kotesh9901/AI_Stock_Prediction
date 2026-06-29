@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
-import yfinance as yf
+from predictor import predict_price
+from data_fetcher import fetch_stock_data
 
 app = Flask(
     __name__,
@@ -18,28 +19,23 @@ def predict():
 
     if request.method == "POST":
 
-        # Get stock symbol
+        # Get stock symbol from user
         stock = request.form["stock"]
 
-        # Download stock data
-        df = yf.download(stock, period="5d")
+        try:
+            # Fetch latest stock features
+            features = fetch_stock_data(stock)
 
-        # Get latest closing price
-        latest_price = float(df["Close"].iloc[-1].iloc[0])
+            # AI Prediction
+            prediction = predict_price(features)
 
-        return f"""
-        <html>
-        <head>
-            <title>Stock Result</title>
-        </head>
-        <body>
+            return f"""
             <h2>Stock: {stock}</h2>
-            <h3>Latest Closing Price: ₹{latest_price:.2f}</h3>
-            <br>
-            <a href="/predict">⬅ Back</a>
-        </body>
-        </html>
-        """
+            <h3>Tomorrow's Predicted Price: ₹{prediction:.2f}</h3>
+            """
+
+        except Exception as e:
+            return f"<h3>Error: {e}</h3>"
 
     return render_template("predict.html")
 
