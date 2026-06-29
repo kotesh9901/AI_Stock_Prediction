@@ -1,3 +1,4 @@
+from chart_data import get_chart_data
 from flask import Flask, render_template, request, session
 from predictor import predict_price
 from data_fetcher import fetch_stock_data
@@ -97,9 +98,20 @@ def dashboard():
     if "email" not in session:
         return render_template("login.html")
 
+    connection = sqlite3.connect("database/stock.db")
+    cursor = connection.cursor()
+
+    cursor.execute("SELECT COUNT(*) FROM predictions")
+    total_predictions = cursor.fetchone()[0]
+
+    connection.close()
+
     return render_template(
         "dashboard.html",
-        name=session["name"]
+        name=session.get("name", "User"),
+        email=session["email"],
+        total_predictions=total_predictions,
+        today=datetime.datetime.now().strftime("%d-%m-%Y")
     )
 
 
@@ -126,6 +138,34 @@ def history():
         "history.html",
         history=history
     )
+# ---------------- WATCHLIST ----------------
+
+@app.route("/watchlist")
+def watchlist():
+
+    connection = sqlite3.connect(
+        "database/stock.db"
+    )
+
+    cursor = connection.cursor()
+
+    cursor.execute(
+        """
+        SELECT stock
+        FROM watchlist
+        WHERE user_email=?
+        """,
+        (session["email"],)
+    )
+
+    stocks = cursor.fetchall()
+
+    connection.close()
+
+    return render_template(
+        "watchlist.html",
+        stocks=stocks
+    )
 
 
 # ---------------- LOGOUT ----------------
@@ -137,6 +177,7 @@ def logout():
     return render_template("index.html")
 
 
+# ---------------- PREDICT ----------------
 # ---------------- PREDICT ----------------
 @app.route("/predict", methods=["GET", "POST"])
 def predict():
@@ -155,6 +196,9 @@ def predict():
 
             # AI Prediction
             prediction = float(predict_price(features))
+
+            # Get chart data
+            labels, prices = get_chart_data(stock)
 
             # Difference
             difference = prediction - current_price
@@ -184,20 +228,20 @@ def predict():
             connection.close()
 
             return render_template(
-            "result.html",
-            stock=stock,
-            current_price=round(current_price, 2),
-            prediction=round(prediction, 2),
-            difference=round(difference, 2),
-            trend=trend
-)
+                "result.html",
+                stock=stock,
+                current_price=round(current_price, 2),
+                prediction=round(prediction, 2),
+                difference=round(difference, 2),
+                trend=trend,
+                labels=labels,
+                prices=prices
+            )
 
         except Exception as e:
             return f"<h3>Error: {e}</h3>"
 
     return render_template("predict.html")
-
-
 # ---------------- RUN APP ----------------
 if __name__ == "__main__":
     app.run(debug=True)

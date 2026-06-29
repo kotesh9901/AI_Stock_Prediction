@@ -33,6 +33,13 @@ CREATE TABLE IF NOT EXISTS predictions(
 
 )
 """)
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS watchlist(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_email TEXT,
+    stock TEXT
+);
+""");
 
 connection.commit()
 
